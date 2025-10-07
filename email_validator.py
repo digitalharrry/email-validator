@@ -88,7 +88,7 @@ if st.button("Validate"):
         with st.spinner("🔍 Validating email..."):
             try:
                 # ----------------- API CALL -----------------
-                api_key = '38f0fe1b-4f35-48ef-bfbc-d50bc51ea0c2'  # <-- Put your API key here
+                api_key = 'API_KEY'  # <-- Put your API key here
                 url = f'https://api.mails.so/v1/validate?email={email}'
                 headers = {'x-mails-api-key': api_key}
 
@@ -132,3 +132,4 @@ st.markdown("""
     &copy; 2025 Email Validator App
 </footer>
 """, unsafe_allow_html=True)
+
