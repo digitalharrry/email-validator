@@ -47,7 +47,7 @@ if st.button("Validate"):
         with st.spinner("🔍 Validating email..."):
             try:
                 # ----------------- API CALL -----------------
-                api_key = '38f0fe1b-4f35-48ef-bfbc-d50bc51ea0c2'  # <-- Your API key
+                api_key = '38f0fe1b-4f35-48ef-bfbc-d50bc51ea0c2'  # <-- Put your API key here
                 url = f'https://api.mails.so/v1/validate?email={email}'
                 headers = {'x-mails-api-key': api_key}
 
@@ -66,19 +66,26 @@ if st.button("Validate"):
                         domain_ok = result.get("isv_domain", False)
                         smtp_ok = result.get("isv_mx", False)
 
-                        # Determine friendly status
+                        # ----------------- FRIENDLY MESSAGE -----------------
                         if format_ok and domain_ok and smtp_ok:
                             st.success("✅ This email is valid and can receive emails!")
                         elif format_ok and domain_ok:
-                            st.warning("⚠️ Email format and domain are correct, but SMTP deliverability could not be verified from this server.")
+                            st.warning("⚠️ Email format and domain are correct, but deliverability could not be verified from this server.")
                         else:
                             st.error("❌ This email failed the validation test or is invalid.")
 
-                        # Optional details
-                        st.markdown(f"**Provider:** {result.get('provider', 'Unknown')}")
-                        st.markdown(f"**MX Record:** {result.get('mx_record', 'N/A')}")
-                        st.markdown(f"**Score:** {result.get('score', 'N/A')}%")
-                        st.markdown(f"**Reason (if invalid):** {result.get('reason', 'N/A')}")
+                        # ----------------- OPTIONAL DETAILS -----------------
+                        details = {
+                            "Provider": result.get("provider"),
+                            "MX Record": result.get("mx_record"),
+                            "Score": f"{result.get('score')}%" if result.get("score") is not None else None,
+                            "Reason": result.get("reason")
+                        }
+
+                        for key, value in details.items():
+                            if value and value != "Unknown" and value != "N/A":
+                                st.markdown(f"**{key}:** {value}")
+
                         st.markdown('</div>', unsafe_allow_html=True)
                     else:
                         st.error("❌ API returned empty response.")
