@@ -7,63 +7,22 @@ st.set_page_config(page_title="Email Validator", page_icon="📧", layout="cente
 # ----------------- CUSTOM CSS -----------------
 st.markdown("""
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Noto+Sans:ital,wght@0,700;1,300&family=Poppins:wght@300;400;500;600&display=swap');
-
 * { font-family: 'Poppins', sans-serif; }
 
 .nav {
-    display: flex;
-    justify-content: space-between;
-    background-color: black;
-    color: white;
-    padding: 12px 20px;
-    border-radius: 8px;
-    margin-bottom: 20px;
+    display: flex; justify-content: space-between;
+    background-color: black; color: white;
+    padding: 12px 20px; border-radius: 8px; margin-bottom: 20px;
 }
-
 .nav a { color: white; text-decoration: none; padding: 0 10px; }
 .nav a:hover { color: rgb(192, 189, 205); }
 
-.container {
-    max-width: 600px;
-    margin: auto;
-    padding: 20px;
-    border-radius: 12px;
-    background-color: #f9f9f9;
-    border: 1px solid #ddd;
-}
+.container { max-width: 600px; margin: auto; padding: 20px; border-radius: 12px; background-color: #f9f9f9; border: 1px solid #ddd; }
+input, button { font-size: 16px; padding: 8px 10px; margin-top: 10px; }
+button { background-color: black; color: white; border-radius: 6px; cursor: pointer; }
 
-input, button {
-    font-size: 16px;
-    padding: 8px 10px;
-    margin-top: 10px;
-}
-
-button {
-    background-color: black;
-    color: white;
-    border-radius: 6px;
-    cursor: pointer;
-}
-
-.result-box {
-    background-color: #fff;
-    padding: 15px;
-    border-radius: 10px;
-    border: 1px solid #ccc;
-    margin-top: 15px;
-    word-break: break-word;
-}
-
-footer {
-    font-size: 12px;
-    background-color: black;
-    color: white;
-    padding: 12px;
-    text-align: center;
-    border-radius: 8px;
-    margin-top: 25px;
-}
+.result-box { background-color: #fff; padding: 15px; border-radius: 10px; border: 1px solid #ccc; margin-top: 15px; word-break: break-word; }
+footer { font-size: 12px; background-color: black; color: white; padding: 12px; text-align: center; border-radius: 8px; margin-top: 25px; }
 </style>
 """, unsafe_allow_html=True)
 
@@ -88,7 +47,7 @@ if st.button("Validate"):
         with st.spinner("🔍 Validating email..."):
             try:
                 # ----------------- API CALL -----------------
-                api_key = st.secrets["API_KEY"]
+                api_key = '38f0fe1b-4f35-48ef-bfbc-d50bc51ea0c2'  # <-- Your API key
                 url = f'https://api.mails.so/v1/validate?email={email}'
                 headers = {'x-mails-api-key': api_key}
 
@@ -99,20 +58,23 @@ if st.button("Validate"):
                 else:
                     result = response.json()
                     if result:
-                        # ----------------- INTERPRET RESULTS -----------------
-                        is_valid = result.get("isv_format", False) and \
-                                   result.get("isv_domain", False) and \
-                                   result.get("isv_mx", False)
-
                         st.markdown('<div class="result-box">', unsafe_allow_html=True)
                         st.markdown(f"**Email:** {email}")
 
-                        if is_valid:
-                            st.success("✅ This email is valid and can receive emails!")
-                        else:
-                            st.error("❌ This email failed the validation test or cannot receive emails.")
+                        # ----------------- VALIDATION LOGIC -----------------
+                        format_ok = result.get("isv_format", False)
+                        domain_ok = result.get("isv_domain", False)
+                        smtp_ok = result.get("isv_mx", False)
 
-                        # Optional: Show additional info
+                        # Determine friendly status
+                        if format_ok and domain_ok and smtp_ok:
+                            st.success("✅ This email is valid and can receive emails!")
+                        elif format_ok and domain_ok:
+                            st.warning("⚠️ Email format and domain are correct, but SMTP deliverability could not be verified from this server.")
+                        else:
+                            st.error("❌ This email failed the validation test or is invalid.")
+
+                        # Optional details
                         st.markdown(f"**Provider:** {result.get('provider', 'Unknown')}")
                         st.markdown(f"**MX Record:** {result.get('mx_record', 'N/A')}")
                         st.markdown(f"**Score:** {result.get('score', 'N/A')}%")
@@ -132,5 +94,3 @@ st.markdown("""
     &copy; 2025 Email Validator App
 </footer>
 """, unsafe_allow_html=True)
-
-
